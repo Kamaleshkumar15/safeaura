@@ -1,0 +1,48 @@
+/* Cross Separation Line - Center Top to Bottom Right */
+.clip-path-cross-line {
+  clip-path: polygon(50% 0%, 100% 100%, 100% 0%);
+}
+
+
+/* Text Reveal Animation */
+@keyframes textReveal {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-text-reveal {
+  animation: textReveal 0.8s ease-out forwards;
+}
+
+/* Text Flow Animation */
+@keyframes textFlow {
+  0% { opacity: 0; letter-spacing: -0.05em; }
+  100% { opacity: 1; letter-spacing: 0em; }
+}
+.animate-text-flow {
+  animation: textFlow 1s ease-in-out forwards;
+}
+
+/* 3D Shadow Effect for Percentage */
+.drop-shadow-3d {
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7), 
+               -2px -2px 4px rgba(255, 255, 255, 0.3);
+}
+
+
+
+@media (max-width: 768px) {
+  nav {
+    padding: 0 2rem;
+  }
+  
+  .mobile-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  
+  .mobile-menu.open {
+    max-height: 100px;
+  }
+}
+
