@@ -1,0 +1,166 @@
+/*
+Automation bd
+Facebook:         https://web.facebook.com/groups/844063765941384
+Website:          https://automationbd1.blogspot.com
+YouTube:          https://www.youtube.com/channel/UCz4uQlukt3UfEjh2oEqpySg
+Map Address check: https://www.maps.ie/coordinates.html
+*/
+
+#include "TinyGPS++.h"
+#include "SoftwareSerial.h"
+
+SoftwareSerial serial_connection(5,6); //tx,rx 
+TinyGPSPlus gps;// GPS object to process the NMEA data
+void setup()
+{
+  Serial.begin(9600);                //This opens up communications to the Serial monitor in the Arduino IDE
+  serial_connection.begin(9600);     //This opens up communications to the GPS
+  Serial.println("GPS Start");        //To show in the serial monitor that the sketch has started
+}
+
+void loop()
+{
+  while(serial_connection.available())              //While there are incoming characters  from the GPS
+  {
+    gps.encode(serial_connection.read());           //This feeds the serial NMEA data into the library one char at a time
+  }
+  if(gps.location.isUpdated())          //This will pretty much be fired all the time anyway but will at least reduce it to only after a package of NMEA data comes in
+  {
+    //Get the latest info from the gps object which it derived from the data sent by the GPS unit
+    Serial.print("Satellite Count:");
+    Serial.println(gps.satellites.value());
+    Serial.print("Latitude:");
+    Serial.println(gps.location.lat(), 6);
+    Serial.print("Longitude:");
+    Serial.println(gps.location.lng(), 6);
+    
+    Serial.print("Altitude Feet:");
+    Serial.println(gps.altitude.feet());
+    Serial.println("");
+
+    Serial.print("Date: ");
+  if (gps.date.isValid())
+  {
+    Serial.print(gps.date.month());
+    Serial.print("/");
+    Serial.print(gps.date.day());
+    Serial.print("/");
+    Serial.println(gps.date.year());
+  }
+  
+  Serial.print("Time: ");
+  if (gps.time.isValid())
+  {
+    if (gps.time.hour() < 10) Serial.print(F("0"));
+    Serial.print(gps.time.hour());
+    Serial.print(":");
+    if (gps.time.minute() < 10) Serial.print(F("0"));
+    Serial.print(gps.time.minute());
+    Serial.print(":");
+    if (gps.time.second() < 10) Serial.print(F("0"));
+    Serial.print(gps.time.second());
+    Serial.print(".GMT");
+  }
+  Serial.println("");
+  delay(2000);
+  }
+  
+}
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <Servo.h>
+
+// Blynk Template Information (Required for Blynk 2.0)
+#define BLYNK_TEMPLATE_ID "TMPL3IT83a8vS"  // Your Blynk Template ID
+#define BLYNK_TEMPLATE_NAME "wheel chair"  // Your Blynk Template Name
+
+// Blynk Credentials
+char auth[] = "NyiXY2OtgXLIunQdUsqDFfUO787cbowk";  // Replace with your Blynk Auth Token
+char ssid[] = "aasm";     // Replace with your Wi-Fi SSID
+char pass[] = "gayathri"; // Replace with your Wi-Fi Password
+
+// Pins
+#define SERVO_PIN D4
+#define IN1 D5
+#define IN2 D6
+#define IN3 D7
+#define IN4 D8
+
+Servo myServo;  // Servo object
+
+// Motor Control Variables
+bool motor1State = false;
+bool motor2State = false;
+
+// Blynk Virtual Pins
+#define VIRTUAL_SERVO_PIN V1  // Slider (0–90°)
+#define MOTOR1_BUTTON V2      // Button for Motor 1
+#define MOTOR2_BUTTON V3      // Button for Motor 2
+
+void setup() {
+  Serial.begin(115200);
+  Blynk.begin(auth, ssid, pass);
+
+  // Servo Setup
+  myServo.attach(SERVO_PIN);
+  myServo.write(0); // Initial position
+
+  // Motor Pins Setup
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  stopMotors(); // Ensure motors are off initially
+}
+
+void loop() {
+  Blynk.run();
+}
+
+// Servo Control (0–90°)
+BLYNK_WRITE(VIRTUAL_SERVO_PIN) {
+  int servoAngle = param.asInt();
+  if (servoAngle > 90) servoAngle = 90; // Restrict to 90°
+  myServo.write(servoAngle);
+}
+
+// Motor 1 Control
+BLYNK_WRITE(MOTOR1_BUTTON) {
+  motor1State = param.asInt();
+  if (motor1State) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+  } else {
+    stopMotors();
+  }
+}
+
+// Motor 2 Control
+BLYNK_WRITE(MOTOR2_BUTTON) {
+  motor2State = param.asInt();
+  if (motor2State) {
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+  } else {
+    stopMotors();
+  }
+}
+
+// Stop Both Motors
+void stopMotors() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
